@@ -51,10 +51,55 @@ app.post('/pdf-link-parse', function (req, res) {
 
   let pdfLink = req.body.link
 
+  let obj =
+  {
+    course: "course name",
+    credits: "cr",
+    score: "sc",
+    courseCode: "course code",
+    echec: "true || false"
+  }
+  let course = false, credits = false, score = false, courseCode = false, echec = false;
+  
+
   crawler(pdfLink).then(function(response){
     // handle response
-    console.log(response.text);
-    res.send({ pdfText: response.text })
+    // console.log(response.text);
+    const [...others] = response.text.split("\n");
+    let results = [];
+    let whiteList = [
+      "2020-2021Année académique :",
+      "2021-2022Année académique :",
+      "SemSigleCoursCr .NoteCodes",
+      "Moyenne générale cumulative",
+      "Moyenne d'option cumulative",
+    ]
+
+    // for(let i = 0; i< others.length; i++){
+      let str = others[16];
+      console.log("Str", str);
+
+      let cr = str.match(/\d/g)[0];
+      console.log("cr", cr);
+
+      let c = str.split(cr)[0];
+      console.log("c", c);
+
+      let afterCr = str.substring(str.indexOf(cr)+ 1);
+      console.log("afterCr", afterCr);
+
+      let afterCrChar = afterCr.match(/\D+/g);
+      let afterCrCode = afterCrChar[1];
+      let scoreCode = afterCr.split(afterCrCode);
+      let score = scoreCode[0];
+      let cCode = afterCrCode + scoreCode[1];
+
+      results[0]= {str, c, cr, afterCr, afterCrChar, afterCrCode,scoreCode,score, cCode};
+    // }
+
+
+
+    res.send({ others, results });
   });
 })
 
